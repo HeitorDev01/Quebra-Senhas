@@ -23,24 +23,34 @@ def carregar_wordlist(caminho):
             palavra = linha.strip()
             if palavra:
                 palavras.append(palavra)
+
     return palavras
 
+def atacar(hahs_alvo, palavras):
+    """Testar cada palavra contra o hash. Devolve a senha, ou None."""
+    for palavra in palavras:
+        if gerar_hash(palavra) == hahs_alvo:
+            return palavra
 
-def senha_confere(senha, hash_alvo):
-    """Devolve True se a senha, uma vez hasheada, bate com o hash-alvo."""
-    return gerar_hash(senha) == hash_alvo
-
+    return None
 
 if __name__ == "__main__":
-    tentativas = ["adimin", "123456", "P@ssw0rd!", "qwerty"]
+    HASHES_ALVO = [
+        "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
+        "0e44ce7308af2b3de5232e4616403ce7d49ba2aec83f79c196409556422a4927",
+        "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8",
+    ]
+
+    palavras = carregar_wordlist("wordlist.txt")
+    print("Wordlist carregada: {} senhas.".format(len(palavras)))
+    print("")
 
     for hash_alvo in HASHES_ALVO:
-        print("Alvo:", hash_alvo)
+        inicio = time.perf_counter()
+        senha = atacar(hash_alvo, palavras)
+        duracao = time.perf_counter() - inicio
 
-        for tentativa in tentativas:
-            if senha_confere(tentativa, hash_alvo):
-                print(" QUEBRADO -> a senha era: {}".format(tentativa))
-                break
+        if senha is not None:
+            print("QUEBRADO em {:.4f}s -> {}".format(duracao, senha))
         else:
-            print("   nao quebrado com esta lista")
-        print("")
+            print("nao quebrado ({:.4f}s) -> {}...".format(duracao, hash_alvo[:16]))
