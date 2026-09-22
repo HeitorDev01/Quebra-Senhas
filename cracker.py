@@ -1,11 +1,12 @@
 """
 
-Etapa 3 - ataque de dicionario.
+Etapa 4 - Quebrar uma lista de hashes e gerar um relatorio.
 
-A lista de tentativas sai do codigo e vira um arquivo: uma "wordlist".
-O ataque de dicionario é o mais comum do mundo real - nao tenta todas as
-comninaçoes possiveis, so as senhas que as pessoas de fato usam.
-Um arquivo desses, com milhoes de senhas vazadas, cabe num pen drive.
+Um atacandte raramente tem um hash só. Ele rouba o banco de dados inteiro
+de senhas de um site e ataca todos de uma vez. Esta etapa faz isso:
+recebe vários hash, ataca cada um, e mede a taxa de sucesso, quantas
+por cento das senhas daquele "vazamento" foram quebradas
+
 """
 import hashlib
 import time
@@ -33,6 +34,44 @@ def atacar(hahs_alvo, palavras):
             return palavra
 
     return None
+
+def atacar_lista(hashes, palavras):
+    """Ataca varios hashes. Devolve uma lista de resultado."""
+    resultados = []
+
+    for hash_alvo in hashes:
+        senha = atacar(hash_alvo, palavras)
+        resultados.append({
+            "hash": hash_alvo,
+            "senha": senha,
+            "quebrado": senha is not None,
+        })
+    return resultados
+
+def imprimir_relatorio(resultados, duracao):
+    """Mostra o que foi quebrado e a taxa de sucesso."""
+    total = len(resultados)
+    quebrados = [r for r in resultados if r["quebrado"]]
+
+    print("")
+    print("=" * 56)
+    print(" RELATORIO DO ATAQUE")
+    print("=" * 56)
+
+    for r in resultados:
+        if r["quebrados"]:
+            print(" [QUEBRADO]  {:<20} {}...".format(r["senha"], r["hash"][:12]))
+        else:
+            print(" [resistiu]  {:<20}  {}...".format("-", r["hash"][:12]))
+
+    print("-" * 56)
+
+    taxa = (len(quebrados) / total * 100) if total else 0
+    print("  {} de {} senhas quebradas ({:.0f}%) em {:.4f}s".format(
+        len(quebrados), total, taxa, duracao
+    ))
+    print("=" * 56)
+    print("")
 
 if __name__ == "__main__":
     HASHES_ALVO = [
