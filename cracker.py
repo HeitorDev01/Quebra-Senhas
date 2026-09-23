@@ -59,7 +59,7 @@ def imprimir_relatorio(resultados, duracao):
     print("=" * 56)
 
     for r in resultados:
-        if r["quebrados"]:
+        if r["quebrado"]:
             print(" [QUEBRADO]  {:<20} {}...".format(r["senha"], r["hash"][:12]))
         else:
             print(" [resistiu]  {:<20}  {}...".format("-", r["hash"][:12]))
@@ -75,21 +75,17 @@ def imprimir_relatorio(resultados, duracao):
 
 if __name__ == "__main__":
     HASHES_ALVO = [
-        "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
-        "0e44ce7308af2b3de5232e4616403ce7d49ba2aec83f79c196409556422a4927",
-        "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8",
+        gerar_hash("123456"),
+        gerar_hash("P@ssw0rd!"),
+        gerar_hash("password"),
+        gerar_hash("xk9-mancha-vento-42"),
+        gerar_hash("dragon"),
     ]
 
     palavras = carregar_wordlist("wordlist.txt")
-    print("Wordlist carregada: {} senhas.".format(len(palavras)))
-    print("")
 
-    for hash_alvo in HASHES_ALVO:
-        inicio = time.perf_counter()
-        senha = atacar(hash_alvo, palavras)
-        duracao = time.perf_counter() - inicio
+    inicio = time.perf_counter()
+    resultados = atacar_lista(HASHES_ALVO, palavras)
+    duracao = time.perf_counter() - inicio
 
-        if senha is not None:
-            print("QUEBRADO em {:.4f}s -> {}".format(duracao, senha))
-        else:
-            print("nao quebrado ({:.4f}s) -> {}...".format(duracao, hash_alvo[:16]))
+    imprimir_relatorio(resultados, duracao)
